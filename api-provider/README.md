@@ -1,0 +1,1 @@
+cp the env.test from chain-api first to here and call it .env

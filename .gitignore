@@ -1,0 +1,7 @@
+orgs/data/*
+api-provider/data/*
+orgs/batchbc-data/*
+orgs/.env
+orgs/OCCS.bootstrap.20240419.tar.gz
+api-provider/batchbc-data/*
+api-proivder/.env

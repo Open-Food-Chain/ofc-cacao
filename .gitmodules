@@ -1,0 +1,19 @@
+[submodule "api-provider/chain-api-data-agnostic"]
+	path = api-provider/chain-api-data-agnostic
+	url = git@github.com:Open-Food-Chain/chain-api-data-agnostic-public.git
+[submodule "orgs/import-api-data-agnostic"]
+	path = orgs/import-api-data-agnostic
+	url = git@github.com:Open-Food-Chain/import-api-data-agnostic-public.git
+[submodule "orgs/blocknotify-data-agnostic"]
+	path = orgs/blocknotify-data-agnostic
+	url = git@github.com:Open-Food-Chain/blocknotify-data-agnostic-public.git
+[submodule "api-provider/insight-oracles-api"]
+	path = api-provider/insight-oracles-api
+	url = https://github.com/Open-Food-Chain/insight-oracles-api/
+[submodule "api-provider/pipeline-backend"]
+	path = api-provider/pipeline-backend
+	url = git@github.com:Open-Food-Chain/pipeline-backend-public.git
+[submodule "api-provider/pipeline-frontend"]
+	path = api-provider/pipeline-frontend
+	url = git@github.com:Open-Food-Chain/pipeline-frontend-public.git
+

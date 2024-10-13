@@ -1,0 +1,84 @@
+version: "3.7"
+services:
+  web:
+    image: import-api-data-agnostic
+    container_name: import-api-agnostic
+    env_file:
+      - env.example
+    ports:
+      - "${IMPORT_API_PORT}:5001"
+
+    command: bash -c "gunicorn -b 0.0.0.0:${IMPORT_API_PORT} app:app"
+
+  block:
+    image: blocknotify-data-agnostic
+    container_name: blocknotify-agnostic
+    env_file:
+      - env.example
+    command: python test.py
+
+  mongo:
+    image: mongo-import
+    container_name: mongodb-import
+    env_file:
+      - env.example
+    ports:
+      - "${MONGODB_PORT}:27017" 
+
+  batchbc-komodo-node:
+    image: imylomylo/openfood-komodo-node:0.8.0
+    environment:
+      - AC_CC=${AC_CC}
+      - AC_PUBKEY=${AC_PUBKEY}
+      - AC_STAKED=${AC_STAKED}
+      - AC_REWARD=${AC_REWARD}
+      - AC_SUPPLY=${AC_SUPPLY}
+      - AC_FOUNDERS=${AC_FOUNDERS}
+      - AC_FOUNDERS_REWARD=${AC_FOUNDERS_REWARD}
+      - AC_ADAPTIVEPOW=${AC_ADAPTIVEPOW}
+      - BLOCKCHAIN_DATA_PATH=${DATA_PATH}/${AC_NAME}
+      - ADD_NODE_1=${ADD_NODE_1}
+      - ADD_NODE_2=${ADD_NODE_2}
+      - THIS_NODE_WALLET=${THIS_NODE_WALLET}
+      - THIS_NODE_PUBKEY=${THIS_NODE_PUBKEY}
+      - THIS_NODE_WIF=${THIS_NODE_WIF}
+      - BLOCKNOTIFY_DIR=${BLOCKNOTIFY_DIR}
+      - BLOCKNOTIFY_CHAINSYNC_LIMIT=${BLOCKNOTIFY_CHAINSYNC_LIMIT}
+      - HOUSEKEEPING_ADDRESS=${HOUSEKEEPING_ADDRESS}
+      - BATCH_SMARTCHAIN_NODE_USERNAME=${BATCH_SMARTCHAIN_NODE_USERNAME}
+      - BATCH_SMARTCHAIN_NODE_PASSWORD=${BATCH_SMARTCHAIN_NODE_PASSWORD}
+      - BATCH_SMARTCHAIN_NODE_RPC_PORT=${BATCH_SMARTCHAIN_NODE_RPC_PORT}
+      - BATCH_SMARTCHAIN_NODE_P2P_PORT=${BATCH_SMARTCHAIN_NODE_P2P_PORT}
+    entrypoint:
+      - "bash"
+      - "-c"
+      - |
+        /opt/komodo/komodo/src/komodod \
+        -ac_cc=$${AC_CC} \
+        -ac_name=${AC_NAME} \
+        -ac_pubkey=$${AC_PUBKEY} \
+        -ac_staked=${AC_STAKED} \
+        -ac_reward=$${AC_REWARD} \
+        -ac_supply=$${AC_SUPPLY} \
+        -ac_founders=$${AC_FOUNDERS} \
+        -ac_founders_reward=$${AC_FOUNDERS_REWARD} \
+        -ac_adaptivepow=$${AC_ADAPTIVEPOW} \
+        -addnode=$${ADD_NODE_1} \
+        -addnode=$${ADD_NODE_2} \
+        -datadir=$${BLOCKCHAIN_DATA_PATH} \
+        -rpcallowip=${DOCKER_KOMODO_SMARTCHAIN_NETWORK_SUBNET} \
+        -rpcallowip=0.0.0.0/0 \
+        -rpcbind=0.0.0.0 \
+        -rpcpassword=${BATCH_SMARTCHAIN_NODE_PASSWORD} \
+        -rpcport=${BATCH_SMARTCHAIN_NODE_RPC_PORT} \
+        -rpcuser=${BATCH_SMARTCHAIN_NODE_USERNAME} \
+        -server=1 \
+        -timeout=18000 \
+        -txindex=1 \
+        -pubkey=$${THIS_NODE_PUBKEY}
+    ports:
+      - "${BATCH_SMARTCHAIN_NODE_P2P_PORT}:${BATCH_SMARTCHAIN_NODE_P2P_PORT}"
+      - "${BATCH_SMARTCHAIN_NODE_RPC_PORT}:${BATCH_SMARTCHAIN_NODE_RPC_PORT}"
+    volumes:
+      - ./batchbc-data:${DATA_PATH}/${AC_NAME}
+

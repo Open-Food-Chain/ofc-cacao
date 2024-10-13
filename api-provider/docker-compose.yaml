@@ -1,0 +1,111 @@
+version: '3'
+services:
+
+  mongo:
+    image: mongo-chain
+    container_name: mongodb-chain
+    env_file:
+      - env.test
+    ports:
+      - "${MONGODB_PORT}:27017" 
+
+  explorer:
+    image: insight-oracles-api
+    container_name: insight-oracles-api
+    env_file:
+      - env.test
+    ports:
+      - "3001:3001"
+    environment:
+      - BITCORE_ENV=debug
+      - WEB_PORT=3001
+      - RPC_USER=${BATCH_SMARTCHAIN_NODE_USERNAME}
+      - RPC_PASSWORD=${BATCH_SMARTCHAIN_NODE_PASSWORD}
+      - LOCAL_KOMODO_SVC_SERVICE_HOST=${BATCH_SMARTCHAIN_NODE_IPV4_ADDR}
+      - LOCAL_KOMODO_SVC_SERVICE_PORT_RPC=${BATCH_SMARTCHAIN_NODE_RPC_PORT}
+      - LOCAL_KOMODO_SVC_SERVICE_PORT_ZMQ=${BATCH_SMARTCHAIN_NODE_ZMQ_PORT}
+    command: bash -c " cat /config/bitcore-node.json.template && apt-get install -y gettext-base && envsubst < /config/bitcore-node.json.template > oracle-explorer/bitcore-node.json && cd oracle-explorer && ./node_modules/bitcore-node-komodo/bin/bitcore-node start"
+    volumes:
+      - ./insight-oracles-api/config:/config
+
+  batchbc-komodo-node:
+    image: imylomylo/openfood-komodo-node:0.8.0
+    environment:
+      - AC_CC=${AC_CC}
+      - AC_PUBKEY=${AC_PUBKEY}
+      - AC_STAKED=${AC_STAKED}
+      - AC_REWARD=${AC_REWARD}
+      - AC_SUPPLY=${AC_SUPPLY}
+      - AC_FOUNDERS=${AC_FOUNDERS}
+      - AC_FOUNDERS_REWARD=${AC_FOUNDERS_REWARD}
+      - AC_ADAPTIVEPOW=${AC_ADAPTIVEPOW}
+      - BLOCKCHAIN_DATA_PATH=${DATA_PATH}/${AC_NAME}
+      - ADD_NODE_1=${ADD_NODE_1}
+      - ADD_NODE_2=${ADD_NODE_2}
+      - THIS_NODE_WALLET=${THIS_NODE_WALLET}
+      - THIS_NODE_PUBKEY=${THIS_NODE_PUBKEY}
+      - THIS_NODE_WIF=${THIS_NODE_WIF}
+      - BLOCKNOTIFY_DIR=${BLOCKNOTIFY_DIR}
+      - BLOCKNOTIFY_CHAINSYNC_LIMIT=${BLOCKNOTIFY_CHAINSYNC_LIMIT}
+      - HOUSEKEEPING_ADDRESS=${HOUSEKEEPING_ADDRESS}
+      - BATCH_SMARTCHAIN_NODE_USERNAME=${BATCH_SMARTCHAIN_NODE_USERNAME}
+      - BATCH_SMARTCHAIN_NODE_PASSWORD=${BATCH_SMARTCHAIN_NODE_PASSWORD}
+      - BATCH_SMARTCHAIN_NODE_RPC_PORT=${BATCH_SMARTCHAIN_NODE_RPC_PORT}
+      - BATCH_SMARTCHAIN_NODE_P2P_PORT=${BATCH_SMARTCHAIN_NODE_P2P_PORT}
+    entrypoint:
+      - "bash"
+      - "-c"
+      - |
+        /opt/komodo/komodo/src/komodod \
+        -ac_cc=$${AC_CC} \
+        -ac_name=${AC_NAME} \
+        -ac_pubkey=$${AC_PUBKEY} \
+        -ac_staked=${AC_STAKED} \
+        -ac_reward=$${AC_REWARD} \
+        -ac_supply=$${AC_SUPPLY} \
+        -ac_founders=$${AC_FOUNDERS} \
+        -ac_founders_reward=$${AC_FOUNDERS_REWARD} \
+        -ac_adaptivepow=$${AC_ADAPTIVEPOW} \
+        -addnode=$${ADD_NODE_1} \
+        -addnode=$${ADD_NODE_2} \
+        -datadir=$${BLOCKCHAIN_DATA_PATH} \
+        -rpcallowip=${DOCKER_KOMODO_SMARTCHAIN_NETWORK_SUBNET} \
+        -rpcallowip=0.0.0.0/0 \
+        -rpcbind=0.0.0.0 \
+        -rpcpassword=${BATCH_SMARTCHAIN_NODE_PASSWORD} \
+        -rpcport=${BATCH_SMARTCHAIN_NODE_RPC_PORT} \
+        -rpcuser=${BATCH_SMARTCHAIN_NODE_USERNAME} \
+        -server=1 \
+        -timeout=18000 \
+        -txindex=1 \
+        -pubkey=$${THIS_NODE_PUBKEY}
+    ports:
+      - "${BATCH_SMARTCHAIN_NODE_P2P_PORT}:${BATCH_SMARTCHAIN_NODE_P2P_PORT}"
+      - "${BATCH_SMARTCHAIN_NODE_RPC_PORT}:${BATCH_SMARTCHAIN_NODE_RPC_PORT}"
+    volumes:
+      - ./batchbc-data:${DATA_PATH}/${AC_NAME}
+
+  pipeline-backend:
+    image: pipeline-backend
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./pipeline-backend:/app
+
+  chain-api:
+    image: chain-api
+    ports:
+      - "5002:5002"
+    volumes:
+      - ./chain-api:/app
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_RUN_HOST=0.0.0.0
+
+  pipeline-frontend:
+    image: pipeline-frontend
+    ports:
+      - "3000:80"
+
+volumes:
+  config: 
