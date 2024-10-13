@@ -1,7 +1,7 @@
-# Integration Test Environment Dev
+# OFC Cacao System For Self Onboarding
 
 ## Description
-This repository contains scripts and configurations for setting up an Integration Test Environment for Development purposes. It facilitates testing and integration of various components in a controlled environment.
+This repository contains scripts and configurations for setting up a Cacao System for Self Onboarding purposes.
 
 ## Prerequisites
 - Git
