@@ -1,0 +1,6 @@
+[submodule "komodo-py"]
+	path = komodo-py
+	url = git@github.com:Diesmaster/komodo-py.git
+[submodule "komodo_py"]
+	path = komodo_py
+	url = git@github.com:Diesmaster/komodo-py.git

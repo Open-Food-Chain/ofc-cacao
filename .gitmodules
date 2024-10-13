@@ -16,4 +16,3 @@
 [submodule "api-provider/pipeline-frontend"]
 	path = api-provider/pipeline-frontend
 	url = git@github.com:Open-Food-Chain/pipeline-frontend-public.git
-
